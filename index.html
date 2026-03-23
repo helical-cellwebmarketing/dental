@@ -435,6 +435,12 @@
 
 <script>
 // ============================================================
+// Google Spreadsheet Config
+// ============================================================
+// ↓ Google Apps Script の Web App URL をここに設定してください
+const GAS_URL = '';
+
+// ============================================================
 // State
 // ============================================================
 const state = {
@@ -703,11 +709,56 @@ function renderResult() {
         <p>${r.cta}</p>
       </div>
 
+      ${GAS_URL ? '<div id="sheetStatus" style="font-size:12px;color:var(--text-light);margin-top:12px;">📤 送信中...</div>' : ''}
+
       <div class="btn-row" style="margin-top:20px;">
         <button class="btn btn-secondary" onclick="restart()">もう一度診断する</button>
       </div>
     </div>
   `;
+}
+
+// ============================================================
+// Google Spreadsheet 送信
+// ============================================================
+function sendToSpreadsheet(level) {
+  if (!GAS_URL) {
+    console.log('GAS_URL が未設定のため、スプレッドシート送信をスキップしました');
+    return;
+  }
+
+  const payload = {
+    timestamp: new Date().toLocaleString('ja-JP'),
+    name: state.child.name || '未入力',
+    age: state.child.age || '未入力',
+    gender: state.child.gender === 'boy' ? '男の子' : state.child.gender === 'girl' ? '女の子' : '未選択',
+    diet: state.diet.join(', ') || 'なし',
+    habits: state.habits.join(', ') || 'なし',
+    concerns: state.concerns.join(', ') || 'なし',
+    result: level === 'green' ? 'キープタイプ' : level === 'yellow' ? '気をつけたいタイプ' : '早めの相談タイプ',
+  };
+
+  const statusEl = document.getElementById('sheetStatus');
+  if (statusEl) statusEl.textContent = '📤 送信中...';
+
+  fetch(GAS_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  })
+  .then(() => {
+    if (statusEl) {
+      statusEl.textContent = '✅ スプレッドシートに記録しました';
+      statusEl.style.color = 'var(--success)';
+    }
+  })
+  .catch(() => {
+    if (statusEl) {
+      statusEl.textContent = '⚠️ 送信に失敗しました';
+      statusEl.style.color = 'var(--danger)';
+    }
+  });
 }
 
 // ============================================================
@@ -815,6 +866,11 @@ function render() {
   // Render card content
   const renderers = [renderStart, renderStep1, renderStep2, renderStep3, renderStep4, renderResult];
   card.innerHTML = renderers[state.step]();
+
+  // 結果画面表示時にスプレッドシートへ送信
+  if (state.step === 5) {
+    sendToSpreadsheet(calcDiagnosis());
+  }
 
   // Scroll to top
   window.scrollTo({ top: 0, behavior: 'smooth' });
