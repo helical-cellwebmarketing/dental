@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>こどもの歯並び診断</title>
+  <style>
+    :root {
+      --primary: #4FC3F7;
+      --primary-dark: #0097C4;
+      --accent: #FF8A65;
+      --accent-dark: #E55B2E;
+      --bg: #F0F8FF;
+      --card: #FFFFFF;
+      --text: #37474F;
+      --text-light: #78909C;
+      --success: #66BB6A;
+      --warning: #FFA726;
+      --danger: #EF5350;
+      --radius: 16px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', Meiryo, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* ========== Header ========== */
+    .header {
+      width: 100%;
+      background: linear-gradient(135deg, var(--primary) 0%, #29B6F6 50%, var(--primary-dark) 100%);
+      padding: 24px 16px 20px;
+      text-align: center;
+      color: #fff;
+      position: relative;
+      overflow: hidden;
+    }
+    .header::after {
+      content: '';
+      position: absolute;
+      bottom: -20px;
+      left: 0; right: 0;
+      height: 40px;
+      background: var(--bg);
+      border-radius: 50% 50% 0 0;
+    }
+    .header-icon { font-size: 40px; margin-bottom: 4px; }
+    .header h1 { font-size: 22px; font-weight: 700; letter-spacing: 1px; }
+    .header p { font-size: 13px; opacity: 0.9; margin-top: 4px; }
+
+    /* ========== Progress Bar ========== */
+    .progress-container {
+      width: 100%;
+      max-width: 480px;
+      padding: 20px 24px 0;
+    }
+    .progress-steps {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: relative;
+      margin-bottom: 8px;
+    }
+    .progress-line {
+      position: absolute;
+      top: 50%;
+      left: 24px;
+      right: 24px;
+      height: 3px;
+      background: #CFD8DC;
+      transform: translateY(-50%);
+      z-index: 0;
+      border-radius: 2px;
+    }
+    .progress-line-fill {
+      position: absolute;
+      top: 50%;
+      left: 24px;
+      height: 3px;
+      background: var(--primary);
+      transform: translateY(-50%);
+      z-index: 1;
+      border-radius: 2px;
+      transition: width 0.5s ease;
+    }
+    .progress-dot {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #CFD8DC;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      color: #fff;
+      z-index: 2;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+    .progress-dot.active {
+      background: var(--primary);
+      transform: scale(1.15);
+      box-shadow: 0 0 0 4px rgba(79, 195, 247, 0.25);
+    }
+    .progress-dot.done {
+      background: var(--success);
+    }
+    .progress-labels {
+      display: flex;
+      justify-content: space-between;
+    }
+    .progress-label {
+      font-size: 10px;
+      color: var(--text-light);
+      text-align: center;
+      width: 56px;
+      transition: color 0.3s;
+    }
+    .progress-label.active { color: var(--primary-dark); font-weight: 600; }
+
+    /* ========== Card ========== */
+    .card-wrapper {
+      width: 100%;
+      max-width: 480px;
+      padding: 16px;
+      flex: 1;
+    }
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: 0 2px 16px rgba(0,0,0,0.06);
+      padding: 28px 24px;
+      animation: slideIn 0.4s ease;
+    }
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(40px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes slideOut {
+      from { opacity: 1; transform: translateX(0); }
+      to   { opacity: 0; transform: translateX(-40px); }
+    }
+    .card.slide-out { animation: slideOut 0.3s ease forwards; }
+
+    .card-title {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .card-subtitle {
+      font-size: 13px;
+      color: var(--text-light);
+      margin-bottom: 20px;
+    }
+
+    /* ========== Form Fields ========== */
+    .field { margin-bottom: 18px; }
+    .field label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+    .field label .required {
+      color: var(--danger);
+      font-size: 12px;
+      margin-left: 4px;
+    }
+    .field input, .field select {
+      width: 100%;
+      padding: 12px 14px;
+      border: 2px solid #E0E0E0;
+      border-radius: 10px;
+      font-size: 16px;
+      outline: none;
+      transition: border-color 0.2s;
+      background: #FAFAFA;
+      font-family: inherit;
+    }
+    .field input:focus, .field select:focus {
+      border-color: var(--primary);
+      background: #fff;
+    }
+    .field input::placeholder { color: #B0BEC5; }
+
+    /* ========== Choice Grid ========== */
+    .choices {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+    .choices.single-col {
+      grid-template-columns: 1fr;
+    }
+    .choice-item {
+      border: 2px solid #E8EEF2;
+      border-radius: 12px;
+      padding: 14px 12px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      user-select: none;
+      position: relative;
+      background: #FAFCFF;
+    }
+    .choice-item:hover { border-color: var(--primary); background: #F0F9FF; }
+    .choice-item.selected {
+      border-color: var(--primary);
+      background: #E1F5FE;
+      box-shadow: 0 0 0 2px rgba(79,195,247,0.2);
+    }
+    .choice-item .icon { font-size: 28px; display: block; margin-bottom: 6px; }
+    .choice-item .label { font-size: 13px; font-weight: 600; line-height: 1.3; }
+    .choice-item .check {
+      position: absolute;
+      top: 6px;
+      right: 8px;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: #fff;
+      font-size: 12px;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+    .choice-item.selected .check { display: flex; }
+
+    .choice-note {
+      font-size: 12px;
+      color: var(--text-light);
+      margin-top: -10px;
+      margin-bottom: 14px;
+    }
+
+    /* ========== Buttons ========== */
+    .btn-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 24px;
+    }
+    .btn {
+      flex: 1;
+      padding: 14px;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+    .btn:active { transform: scale(0.97); }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(79,195,247,0.35);
+    }
+    .btn-primary:hover { box-shadow: 0 6px 16px rgba(79,195,247,0.5); }
+    .btn-primary:disabled {
+      background: #CFD8DC;
+      box-shadow: none;
+      cursor: not-allowed;
+    }
+    .btn-secondary {
+      background: #ECEFF1;
+      color: var(--text);
+    }
+    .btn-secondary:hover { background: #CFD8DC; }
+    .btn-accent {
+      background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(255,138,101,0.35);
+    }
+
+    /* ========== Start Screen ========== */
+    .start-screen { text-align: center; padding: 20px 0; }
+    .start-screen .mascot { font-size: 80px; margin-bottom: 8px; }
+    .start-screen h2 { font-size: 22px; margin-bottom: 8px; color: var(--primary-dark); }
+    .start-screen p { font-size: 14px; color: var(--text-light); margin-bottom: 24px; line-height: 1.7; }
+    .start-features {
+      text-align: left;
+      margin: 0 auto 24px;
+      max-width: 300px;
+    }
+    .start-features li {
+      list-style: none;
+      font-size: 14px;
+      padding: 6px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .start-features li::before { content: '✅'; font-size: 16px; }
+    .start-time {
+      font-size: 12px;
+      color: var(--text-light);
+      background: #F5F5F5;
+      display: inline-block;
+      padding: 6px 16px;
+      border-radius: 20px;
+      margin-bottom: 16px;
+    }
+
+    /* ========== Result Screen ========== */
+    .result-screen { text-align: center; }
+    .result-icon { font-size: 64px; margin-bottom: 8px; }
+    .result-type-badge {
+      display: inline-block;
+      padding: 6px 20px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: #fff;
+    }
+    .result-type-badge.green { background: var(--success); }
+    .result-type-badge.yellow { background: var(--warning); }
+    .result-type-badge.red { background: var(--accent); }
+    .result-name { font-size: 16px; margin-bottom: 16px; color: var(--text-light); }
+
+    .result-section {
+      text-align: left;
+      background: #F8FBFF;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 14px;
+    }
+    .result-section h4 {
+      font-size: 14px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .result-section p, .result-section li {
+      font-size: 13px;
+      line-height: 1.7;
+      color: var(--text);
+    }
+    .result-section ul { padding-left: 18px; }
+
+    .result-cta {
+      background: linear-gradient(135deg, #FFF3E0, #FFE0B2);
+      border-radius: 12px;
+      padding: 18px 16px;
+      margin-top: 16px;
+    }
+    .result-cta h4 {
+      font-size: 15px;
+      margin-bottom: 6px;
+      color: var(--accent-dark);
+    }
+    .result-cta p {
+      font-size: 13px;
+      color: #795548;
+      line-height: 1.6;
+    }
+
+    /* ========== Floating Teeth ========== */
+    .floating {
+      position: fixed;
+      pointer-events: none;
+      opacity: 0.08;
+      font-size: 40px;
+      animation: float 6s ease-in-out infinite;
+      z-index: 0;
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      50% { transform: translateY(-20px) rotate(10deg); }
+    }
+
+    /* ========== Responsive ========== */
+    @media (max-width: 400px) {
+      .header h1 { font-size: 18px; }
+      .card { padding: 20px 16px; }
+      .choices { gap: 8px; }
+      .choice-item { padding: 10px 8px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Floating decoration -->
+<div class="floating" style="top:20%;left:5%;animation-delay:0s;">🦷</div>
+<div class="floating" style="top:50%;right:5%;animation-delay:2s;">🪥</div>
+<div class="floating" style="bottom:15%;left:10%;animation-delay:4s;">✨</div>
+
+<!-- Header -->
+<div class="header">
+  <div class="header-icon">🦷</div>
+  <h1>こどもの歯並び診断</h1>
+  <p>お子さまの将来の笑顔のために</p>
+</div>
+
+<!-- Progress Bar -->
+<div class="progress-container" id="progressContainer" style="display:none;">
+  <div class="progress-steps">
+    <div class="progress-line"></div>
+    <div class="progress-line-fill" id="progressFill"></div>
+    <div class="progress-dot" data-step="1">1</div>
+    <div class="progress-dot" data-step="2">2</div>
+    <div class="progress-dot" data-step="3">3</div>
+    <div class="progress-dot" data-step="4">4</div>
+    <div class="progress-dot" data-step="5">5</div>
+  </div>
+  <div class="progress-labels">
+    <span class="progress-label">お子さま<br>情報</span>
+    <span class="progress-label">食生活</span>
+    <span class="progress-label">癖・習慣</span>
+    <span class="progress-label">歯並び</span>
+    <span class="progress-label">診断結果</span>
+  </div>
+</div>
+
+<!-- Card Wrapper -->
+<div class="card-wrapper">
+  <div class="card" id="card">
+    <!-- Content is rendered by JS -->
+  </div>
+</div>
+
+<script>
+// ============================================================
+// State
+// ============================================================
+const state = {
+  step: 0, // 0=start, 1..4=questions, 5=result
+  child: { name: '', age: '', gender: '' },
+  diet: [],
+  habits: [],
+  concerns: [],
+};
+
+// ============================================================
+// Step Definitions
+// ============================================================
+
+function renderStart() {
+  return `
+    <div class="start-screen">
+      <div class="mascot">🦷✨</div>
+      <h2>お子さまの歯並び<br>大丈夫？診断</h2>
+      <p>かんたんな質問に答えるだけで<br>お子さまの歯並びの傾向がわかります！</p>
+      <div class="start-time">⏱ 所要時間：約2分</div>
+      <ul class="start-features">
+        <li>お子さまの情報を入力</li>
+        <li>食生活や癖をチェック</li>
+        <li>歯並びの気になることを選択</li>
+        <li>診断結果＆アドバイス</li>
+      </ul>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="goNext()">診断をはじめる 🚀</button>
+      </div>
+    </div>
+  `;
+}
+
+function renderStep1() {
+  return `
+    <div class="card-title">👶 お子さまの情報</div>
+    <div class="card-subtitle">お子さまについて教えてください</div>
+    <div class="field">
+      <label>お名前（ニックネーム可）<span class="required">必須</span></label>
+      <input type="text" id="childName" placeholder="例：たろう" value="${state.child.name}" maxlength="20">
+    </div>
+    <div class="field">
+      <label>年齢<span class="required">必須</span></label>
+      <select id="childAge">
+        <option value="">選択してください</option>
+        ${[...Array(15)].map((_,i) => `<option value="${i+1}" ${state.child.age == i+1 ? 'selected':''}>${i+1}歳</option>`).join('')}
+      </select>
+    </div>
+    <div class="field">
+      <label>性別</label>
+      <div class="choices">
+        <div class="choice-item ${state.child.gender==='boy'?'selected':''}" onclick="selectGender('boy')">
+          <span class="icon">👦</span><span class="label">おとこの子</span>
+          <span class="check">✓</span>
+        </div>
+        <div class="choice-item ${state.child.gender==='girl'?'selected':''}" onclick="selectGender('girl')">
+          <span class="icon">👧</span><span class="label">おんなの子</span>
+          <span class="check">✓</span>
+        </div>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="goBack()">もどる</button>
+      <button class="btn btn-primary" id="nextBtn" onclick="goNext()">つぎへ ➡</button>
+    </div>
+  `;
+}
+
+function selectGender(g) {
+  state.child.gender = g;
+  render();
+}
+
+function renderStep2() {
+  const items = [
+    { id: 'soft', icon: '🍞', label: 'やわらかい食べ物が多い' },
+    { id: 'sweets', icon: '🍬', label: 'おやつ・甘い物が多い' },
+    { id: 'juice', icon: '🧃', label: 'ジュースをよく飲む' },
+    { id: 'few_veg', icon: '🥦', label: '野菜が少ない' },
+    { id: 'irregular', icon: '⏰', label: '食事時間が不規則' },
+    { id: 'hard', icon: '🥩', label: 'よく噛んで食べる' },
+  ];
+  return `
+    <div class="card-title">🍽 食生活について</div>
+    <div class="card-subtitle">あてはまるものをすべて選んでください</div>
+    <p class="choice-note">※ 複数選択できます</p>
+    <div class="choices">
+      ${items.map(it => `
+        <div class="choice-item ${state.diet.includes(it.id)?'selected':''}" onclick="toggleChoice('diet','${it.id}')">
+          <span class="icon">${it.icon}</span><span class="label">${it.label}</span>
+          <span class="check">✓</span>
+        </div>
+      `).join('')}
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="goBack()">もどる</button>
+      <button class="btn btn-primary" onclick="goNext()">つぎへ ➡</button>
+    </div>
+  `;
+}
+
+function renderStep3() {
+  const items = [
+    { id: 'thumb', icon: '👆', label: '指しゃぶり' },
+    { id: 'mouth_breath', icon: '😮', label: '口呼吸をしている' },
+    { id: 'tongue', icon: '👅', label: '舌を出す癖がある' },
+    { id: 'lip_bite', icon: '😬', label: '唇を噛む癖がある' },
+    { id: 'nail', icon: '💅', label: '爪を噛む' },
+    { id: 'grind', icon: '😤', label: '歯ぎしりをする' },
+    { id: 'one_side', icon: '🍴', label: '片側だけで噛む' },
+    { id: 'none', icon: '😊', label: '特にない' },
+  ];
+  return `
+    <div class="card-title">🔍 癖・習慣について</div>
+    <div class="card-subtitle">お子さまにあてはまるものをすべて選んでください</div>
+    <p class="choice-note">※ 複数選択できます</p>
+    <div class="choices">
+      ${items.map(it => `
+        <div class="choice-item ${state.habits.includes(it.id)?'selected':''}" onclick="toggleChoice('habits','${it.id}')">
+          <span class="icon">${it.icon}</span><span class="label">${it.label}</span>
+          <span class="check">✓</span>
+        </div>
+      `).join('')}
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="goBack()">もどる</button>
+      <button class="btn btn-primary" onclick="goNext()">つぎへ ➡</button>
+    </div>
+  `;
+}
+
+function renderStep4() {
+  const items = [
+    { id: 'crowding', icon: '🔀', label: 'ガタガタ・<br>でこぼこ' },
+    { id: 'overbite', icon: '🫦', label: '出っ歯が<br>気になる' },
+    { id: 'underbite', icon: '😬', label: '受け口が<br>気になる' },
+    { id: 'gap', icon: '🪥', label: 'すきっ歯が<br>気になる' },
+    { id: 'open_bite', icon: '😲', label: '前歯が<br>噛み合わない' },
+    { id: 'crossbite', icon: '↔️', label: '噛み合わせが<br>ずれている' },
+    { id: 'late', icon: '🕐', label: '生え変わりが<br>遅い' },
+    { id: 'none', icon: '😊', label: '特に<br>気にならない' },
+  ];
+  return `
+    <div class="card-title">😁 歯並びで気になること</div>
+    <div class="card-subtitle">気になることをすべて選んでください</div>
+    <p class="choice-note">※ 複数選択できます</p>
+    <div class="choices">
+      ${items.map(it => `
+        <div class="choice-item ${state.concerns.includes(it.id)?'selected':''}" onclick="toggleChoice('concerns','${it.id}')">
+          <span class="icon">${it.icon}</span><span class="label">${it.label}</span>
+          <span class="check">✓</span>
+        </div>
+      `).join('')}
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="goBack()">もどる</button>
+      <button class="btn btn-accent" onclick="goNext()">診断結果を見る 🔮</button>
+    </div>
+  `;
+}
+
+// ============================================================
+// Diagnosis Logic
+// ============================================================
+function calcDiagnosis() {
+  let score = 0; // higher = more risk
+
+  // Diet risks
+  const dietRisks = ['soft', 'sweets', 'juice', 'few_veg', 'irregular'];
+  dietRisks.forEach(r => { if (state.diet.includes(r)) score += 1; });
+  if (state.diet.includes('hard')) score -= 1;
+
+  // Habit risks
+  const habitRisks = ['thumb', 'mouth_breath', 'tongue', 'lip_bite', 'nail', 'grind', 'one_side'];
+  habitRisks.forEach(r => { if (state.habits.includes(r)) score += 1.5; });
+  if (state.habits.includes('none')) score -= 1;
+
+  // Concern risks
+  const concernRisks = ['crowding', 'overbite', 'underbite', 'gap', 'open_bite', 'crossbite', 'late'];
+  concernRisks.forEach(r => { if (state.concerns.includes(r)) score += 2; });
+  if (state.concerns.includes('none')) score -= 2;
+
+  // Determine level
+  if (score <= 2) return 'green';
+  if (score <= 6) return 'yellow';
+  return 'red';
+}
+
+function renderResult() {
+  const level = calcDiagnosis();
+  const name = state.child.name || 'おこさま';
+  const age = state.child.age ? `${state.child.age}歳` : '';
+
+  const results = {
+    green: {
+      icon: '😄',
+      badge: 'green',
+      title: 'きれいな歯並びキープタイプ',
+      summary: `${name}さん（${age}）の歯並びは、今のところ大きな心配はなさそうです！このまま良い習慣を続けて、きれいな歯並びをキープしましょう。`,
+      future: '今の良い習慣を続ければ、将来もきれいな歯並びで自信あふれる笑顔が期待できます。定期的な検診で歯の成長を見守りましょう。',
+      advice: [
+        '定期検診（3〜6ヶ月ごと）を継続しましょう',
+        '仕上げ磨きでお口の中をチェック',
+        'よく噛む食事を心がけましょう',
+      ],
+      cta: '今の歯並びを維持するためにも、定期検診での経過観察をおすすめします。お気軽に受付にお声がけください。',
+    },
+    yellow: {
+      icon: '🤔',
+      badge: 'yellow',
+      title: 'ちょっと気をつけたいタイプ',
+      summary: `${name}さん（${age}）には、歯並びに影響する可能性がある習慣や兆候が見られます。今から対策することで、将来の大がかりな矯正を防げるかもしれません。`,
+      future: '今のうちに生活習慣を見直したり、早めの相談をすることで、歯並びが大きく乱れるのを予防できます。成長期の今がチャンスです！',
+      advice: [
+        '気になる癖を意識的に減らしてみましょう',
+        'バランスの良い食事・よく噛む習慣を',
+        '歯科医師への早めの相談がおすすめ',
+        '3ヶ月ごとの定期検診を',
+      ],
+      cta: '早めの矯正相談で、お子さまの将来の歯並びを守りましょう。当院では無料矯正相談を実施しています。受付にお気軽にお声がけください。',
+    },
+    red: {
+      icon: '😟',
+      badge: 'red',
+      title: '早めの相談がおすすめタイプ',
+      summary: `${name}さん（${age}）には、歯並びへの影響が気になるポイントがいくつか見つかりました。でも安心してください！早めに対応することで、効果的な改善が期待できます。`,
+      future: 'そのまま放置すると歯並びの乱れが大きくなる可能性がありますが、成長期の今なら矯正治療の効果が出やすく、負担も少なくて済みます。',
+      advice: [
+        'できるだけ早く矯正相談をしましょう',
+        '口呼吸や舌の癖がある場合は特に注意',
+        '食生活の改善も効果的です',
+        'お子さまに合った矯正方法を一緒に見つけましょう',
+      ],
+      cta: '成長期の今が矯正治療のベストタイミングです！当院では無料矯正相談を実施しています。診断結果を元に、最適なプランをご提案します。受付にお声がけください。',
+    },
+  };
+
+  const r = results[level];
+
+  return `
+    <div class="result-screen">
+      <div class="result-icon">${r.icon}</div>
+      <div class="result-type-badge ${r.badge}">${r.title}</div>
+      <div class="result-name">${name}さん（${age}）の診断結果</div>
+
+      <div class="result-section">
+        <h4>📋 診断サマリー</h4>
+        <p>${r.summary}</p>
+      </div>
+
+      <div class="result-section">
+        <h4>🔮 将来の予測</h4>
+        <p>${r.future}</p>
+      </div>
+
+      <div class="result-section">
+        <h4>💡 おすすめアドバイス</h4>
+        <ul>
+          ${r.advice.map(a => `<li>${a}</li>`).join('')}
+        </ul>
+      </div>
+
+      <div class="result-cta">
+        <h4>🏥 当院からのご案内</h4>
+        <p>${r.cta}</p>
+      </div>
+
+      <div class="btn-row" style="margin-top:20px;">
+        <button class="btn btn-secondary" onclick="restart()">もう一度診断する</button>
+      </div>
+    </div>
+  `;
+}
+
+// ============================================================
+// Navigation
+// ============================================================
+function toggleChoice(field, id) {
+  const arr = state[field];
+  // "none" is exclusive
+  if (id === 'none') {
+    state[field] = arr.includes('none') ? [] : ['none'];
+  } else {
+    const filtered = arr.filter(x => x !== 'none');
+    const idx = filtered.indexOf(id);
+    if (idx >= 0) filtered.splice(idx, 1);
+    else filtered.push(id);
+    state[field] = filtered;
+  }
+  render();
+}
+
+function saveStep() {
+  if (state.step === 1) {
+    const nameEl = document.getElementById('childName');
+    const ageEl = document.getElementById('childAge');
+    if (nameEl) state.child.name = nameEl.value.trim();
+    if (ageEl) state.child.age = ageEl.value;
+  }
+}
+
+function validateStep() {
+  if (state.step === 1) {
+    return state.child.name !== '' && state.child.age !== '';
+  }
+  return true;
+}
+
+function goNext() {
+  saveStep();
+  if (!validateStep()) {
+    // Shake animation for validation
+    const card = document.getElementById('card');
+    card.style.animation = 'none';
+    card.offsetHeight; // reflow
+    card.style.animation = 'shake 0.4s ease';
+    alert('お名前と年齢をご入力ください');
+    return;
+  }
+
+  const card = document.getElementById('card');
+  card.classList.add('slide-out');
+  setTimeout(() => {
+    state.step++;
+    card.classList.remove('slide-out');
+    render();
+  }, 250);
+}
+
+function goBack() {
+  saveStep();
+  state.step--;
+  render();
+}
+
+function restart() {
+  state.step = 0;
+  state.child = { name: '', age: '', gender: '' };
+  state.diet = [];
+  state.habits = [];
+  state.concerns = [];
+  render();
+}
+
+// ============================================================
+// Render
+// ============================================================
+function render() {
+  const card = document.getElementById('card');
+  const prog = document.getElementById('progressContainer');
+
+  // Show/hide progress
+  prog.style.display = state.step >= 1 ? 'block' : 'none';
+
+  // Update progress dots
+  document.querySelectorAll('.progress-dot').forEach(dot => {
+    const s = parseInt(dot.dataset.step);
+    dot.classList.remove('active', 'done');
+    if (s < state.step) { dot.classList.add('done'); dot.textContent = '✓'; }
+    else if (s === state.step) { dot.classList.add('active'); dot.textContent = s; }
+    else { dot.textContent = s; }
+  });
+
+  // Update progress labels
+  document.querySelectorAll('.progress-label').forEach((lbl, i) => {
+    lbl.classList.toggle('active', i + 1 === state.step);
+  });
+
+  // Update progress fill line
+  const fill = document.getElementById('progressFill');
+  const pct = Math.max(0, (state.step - 1) / 4 * 100);
+  const containerWidth = document.querySelector('.progress-steps')?.offsetWidth || 400;
+  const padding = 24;
+  const usable = containerWidth - padding * 2;
+  fill.style.width = (usable * pct / 100) + 'px';
+
+  // Render card content
+  const renderers = [renderStart, renderStep1, renderStep2, renderStep3, renderStep4, renderResult];
+  card.innerHTML = renderers[state.step]();
+
+  // Scroll to top
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// Init
+render();
+</script>
+</body>
+</html>
