@@ -26,7 +26,7 @@
 //
 // =================================================================
 
-function doGet(e) {
+function doPost(e) {
   var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
   var p = e.parameter;
 
@@ -42,6 +42,12 @@ function doGet(e) {
   ]);
 
   return ContentService
-    .createTextOutput(JSON.stringify({ status: 'ok' }))
-    .setMimeType(ContentService.MimeType.JSON);
+    .createTextOutput('ok')
+    .setMimeType(ContentService.MimeType.TEXT);
+}
+
+function doGet() {
+  return ContentService
+    .createTextOutput('Dental Diagnosis API is running.')
+    .setMimeType(ContentService.MimeType.TEXT);
 }

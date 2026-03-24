@@ -727,7 +727,7 @@ function sendToSpreadsheet(level) {
     return;
   }
 
-  const params = new URLSearchParams({
+  const fields = {
     timestamp: new Date().toLocaleString('ja-JP'),
     name: state.child.name || '未入力',
     age: state.child.age || '未入力',
@@ -736,24 +736,49 @@ function sendToSpreadsheet(level) {
     habits: state.habits.join(', ') || 'なし',
     concerns: state.concerns.join(', ') || 'なし',
     result: level === 'green' ? 'キープタイプ' : level === 'yellow' ? '気をつけたいタイプ' : '早めの相談タイプ',
-  });
+  };
 
   const statusEl = document.getElementById('sheetStatus');
   if (statusEl) statusEl.textContent = '📤 送信中...';
 
-  fetch(GAS_URL + '?' + params.toString(), { mode: 'no-cors' })
-  .then(() => {
+  // hidden iframe + form で送信（CORS・リダイレクト問題を回避）
+  var iframe = document.getElementById('gasFrame');
+  if (!iframe) {
+    iframe = document.createElement('iframe');
+    iframe.id = 'gasFrame';
+    iframe.name = 'gasFrame';
+    iframe.style.display = 'none';
+    document.body.appendChild(iframe);
+  }
+
+  var form = document.createElement('form');
+  form.method = 'POST';
+  form.action = GAS_URL;
+  form.target = 'gasFrame';
+  for (var key in fields) {
+    var input = document.createElement('input');
+    input.type = 'hidden';
+    input.name = key;
+    input.value = fields[key];
+    form.appendChild(input);
+  }
+  document.body.appendChild(form);
+  form.submit();
+  form.remove();
+
+  // iframe のロード完了で送信成功とみなす
+  iframe.onload = function() {
     if (statusEl) {
       statusEl.textContent = '✅ スプレッドシートに記録しました';
       statusEl.style.color = 'var(--success)';
     }
-  })
-  .catch(() => {
+  };
+  iframe.onerror = function() {
     if (statusEl) {
       statusEl.textContent = '⚠️ 送信に失敗しました';
       statusEl.style.color = 'var(--danger)';
     }
-  });
+  };
 }
 
 // ============================================================
