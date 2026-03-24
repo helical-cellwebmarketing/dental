@@ -26,28 +26,25 @@
 //
 // =================================================================
 
-function doPost(e) {
+function doGet(e) {
   var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
   var p = e.parameter;
 
-  sheet.appendRow([
-    p.timestamp || '',
-    p.name || '',
-    p.age || '',
-    p.gender || '',
-    p.diet || '',
-    p.habits || '',
-    p.concerns || '',
-    p.result || '',
-  ]);
+  // パラメータがある場合はデータを保存
+  if (p.name) {
+    sheet.appendRow([
+      p.timestamp || '',
+      p.name || '',
+      p.age || '',
+      p.gender || '',
+      p.diet || '',
+      p.habits || '',
+      p.concerns || '',
+      p.result || '',
+    ]);
+  }
 
   return ContentService
     .createTextOutput('ok')
-    .setMimeType(ContentService.MimeType.TEXT);
-}
-
-function doGet() {
-  return ContentService
-    .createTextOutput('Dental Diagnosis API is running.')
     .setMimeType(ContentService.MimeType.TEXT);
 }
