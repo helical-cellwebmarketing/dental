@@ -493,11 +493,11 @@ function renderStep1() {
     <div class="field">
       <label>性別</label>
       <div class="choices">
-        <div class="choice-item ${state.child.gender==='boy'?'selected':''}" onclick="selectGender('boy')">
+        <div class="choice-item ${state.child.gender==='boy'?'selected':''}" data-gender="boy" onclick="selectGender('boy')">
           <span class="icon">👦</span><span class="label">おとこの子</span>
           <span class="check">✓</span>
         </div>
-        <div class="choice-item ${state.child.gender==='girl'?'selected':''}" onclick="selectGender('girl')">
+        <div class="choice-item ${state.child.gender==='girl'?'selected':''}" data-gender="girl" onclick="selectGender('girl')">
           <span class="icon">👧</span><span class="label">おんなの子</span>
           <span class="check">✓</span>
         </div>
@@ -511,13 +511,11 @@ function renderStep1() {
 }
 
 function selectGender(g) {
-  // 再描画前に入力中の名前・年齢を保存
-  const nameEl = document.getElementById('childName');
-  const ageEl = document.getElementById('childAge');
-  if (nameEl) state.child.name = nameEl.value;
-  if (ageEl) state.child.age = ageEl.value;
   state.child.gender = g;
-  render();
+  // 入力欄を壊さないよう、性別ボタンの見た目だけ更新する
+  document.querySelectorAll('.choices .choice-item').forEach(el => {
+    el.classList.toggle('selected', el.getAttribute('data-gender') === g);
+  });
 }
 
 function renderStep2() {
