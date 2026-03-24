@@ -26,28 +26,22 @@
 //
 // =================================================================
 
-function doPost(e) {
+function doGet(e) {
   var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-  var data = JSON.parse(e.postData.contents);
+  var p = e.parameter;
 
   sheet.appendRow([
-    data.timestamp,
-    data.name,
-    data.age,
-    data.gender,
-    data.diet,
-    data.habits,
-    data.concerns,
-    data.result,
+    p.timestamp || '',
+    p.name || '',
+    p.age || '',
+    p.gender || '',
+    p.diet || '',
+    p.habits || '',
+    p.concerns || '',
+    p.result || '',
   ]);
 
   return ContentService
     .createTextOutput(JSON.stringify({ status: 'ok' }))
     .setMimeType(ContentService.MimeType.JSON);
-}
-
-function doGet() {
-  return ContentService
-    .createTextOutput('Dental Diagnosis API is running.')
-    .setMimeType(ContentService.MimeType.TEXT);
 }

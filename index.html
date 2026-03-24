@@ -727,7 +727,7 @@ function sendToSpreadsheet(level) {
     return;
   }
 
-  const payload = {
+  const params = new URLSearchParams({
     timestamp: new Date().toLocaleString('ja-JP'),
     name: state.child.name || '未入力',
     age: state.child.age || '未入力',
@@ -736,17 +736,12 @@ function sendToSpreadsheet(level) {
     habits: state.habits.join(', ') || 'なし',
     concerns: state.concerns.join(', ') || 'なし',
     result: level === 'green' ? 'キープタイプ' : level === 'yellow' ? '気をつけたいタイプ' : '早めの相談タイプ',
-  };
+  });
 
   const statusEl = document.getElementById('sheetStatus');
   if (statusEl) statusEl.textContent = '📤 送信中...';
 
-  fetch(GAS_URL, {
-    method: 'POST',
-    mode: 'no-cors',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
-  })
+  fetch(GAS_URL + '?' + params.toString(), { mode: 'no-cors' })
   .then(() => {
     if (statusEl) {
       statusEl.textContent = '✅ スプレッドシートに記録しました';
