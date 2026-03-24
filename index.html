@@ -511,6 +511,11 @@ function renderStep1() {
 }
 
 function selectGender(g) {
+  // 再描画前に入力中の名前・年齢を保存
+  const nameEl = document.getElementById('childName');
+  const ageEl = document.getElementById('childAge');
+  if (nameEl) state.child.name = nameEl.value;
+  if (ageEl) state.child.age = ageEl.value;
   state.child.gender = g;
   render();
 }
@@ -727,14 +732,18 @@ function sendToSpreadsheet(level) {
     return;
   }
 
+  const dietLabels = { soft: 'やわらかい食べ物が多い', sweets: 'お菓子・甘いものが多い', juice: 'ジュースをよく飲む', few_veg: '野菜が少ない', irregular: '食事時間が不規則', hard: 'よく噛む食べ物が多い' };
+  const habitLabels = { thumb: '指しゃぶり', mouth_breath: '口呼吸', tongue: '舌の癖', lip_bite: '唇を噛む', nail: '爪を噛む', grind: '歯ぎしり', one_side: '片側で噛む', none: '特になし' };
+  const concernLabels = { crowding: '歯並びがガタガタ', overbite: '出っ歯', underbite: '受け口', gap: 'すきっ歯', open_bite: '開咬', crossbite: '交叉咬合', late: '歯の生え変わりが遅い', none: '特になし' };
+
   const params = new URLSearchParams({
     timestamp: new Date().toLocaleString('ja-JP'),
     name: state.child.name || '未入力',
     age: state.child.age || '未入力',
     gender: state.child.gender === 'boy' ? '男の子' : state.child.gender === 'girl' ? '女の子' : '未選択',
-    diet: state.diet.join(', ') || 'なし',
-    habits: state.habits.join(', ') || 'なし',
-    concerns: state.concerns.join(', ') || 'なし',
+    diet: state.diet.map(k => dietLabels[k] || k).join(', ') || 'なし',
+    habits: state.habits.map(k => habitLabels[k] || k).join(', ') || 'なし',
+    concerns: state.concerns.map(k => concernLabels[k] || k).join(', ') || 'なし',
     result: level === 'green' ? 'キープタイプ' : level === 'yellow' ? '気をつけたいタイプ' : '早めの相談タイプ',
   });
 
