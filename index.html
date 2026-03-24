@@ -511,6 +511,11 @@ function renderStep1() {
 }
 
 function selectGender(g) {
+  // 再描画前に入力中の名前・年齢を保存
+  const nameEl = document.getElementById('childName');
+  const ageEl = document.getElementById('childAge');
+  if (nameEl) state.child.name = nameEl.value;
+  if (ageEl) state.child.age = ageEl.value;
   state.child.gender = g;
   render();
 }
