@@ -435,6 +435,12 @@
 
 <script>
 // ============================================================
+// Google Spreadsheet Config
+// ============================================================
+// ↓ Google Apps Script の Web App URL をここに設定してください
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbx0p-tsnFrQ11j8e8Mp05uO6a7gYcE4bR7BAwX2B4hkZAEPPh3pG_0R0cARIj6WjWYTfA/exec';
+
+// ============================================================
 // State
 // ============================================================
 const state = {
@@ -703,11 +709,56 @@ function renderResult() {
         <p>${r.cta}</p>
       </div>
 
+      ${GAS_URL ? '<div id="sheetStatus" style="font-size:12px;color:var(--text-light);margin-top:12px;">📤 送信中...</div>' : ''}
+
       <div class="btn-row" style="margin-top:20px;">
         <button class="btn btn-secondary" onclick="restart()">もう一度診断する</button>
       </div>
     </div>
   `;
+}
+
+// ============================================================
+// Google Spreadsheet 送信
+// ============================================================
+function sendToSpreadsheet(level) {
+  if (!GAS_URL) {
+    console.log('GAS_URL が未設定のため、スプレッドシート送信をスキップしました');
+    return;
+  }
+
+  const params = new URLSearchParams({
+    timestamp: new Date().toLocaleString('ja-JP'),
+    name: state.child.name || '未入力',
+    age: state.child.age || '未入力',
+    gender: state.child.gender === 'boy' ? '男の子' : state.child.gender === 'girl' ? '女の子' : '未選択',
+    diet: state.diet.join(', ') || 'なし',
+    habits: state.habits.join(', ') || 'なし',
+    concerns: state.concerns.join(', ') || 'なし',
+    result: level === 'green' ? 'キープタイプ' : level === 'yellow' ? '気をつけたいタイプ' : '早めの相談タイプ',
+  });
+
+  const statusEl = document.getElementById('sheetStatus');
+  if (statusEl) statusEl.textContent = '📤 送信中...';
+
+  // hidden iframe の src に GET パラメータを渡して送信（CORS 問題なし）
+  var iframe = document.getElementById('gasFrame');
+  if (!iframe) {
+    iframe = document.createElement('iframe');
+    iframe.id = 'gasFrame';
+    iframe.name = 'gasFrame';
+    iframe.style.display = 'none';
+    document.body.appendChild(iframe);
+  }
+
+  iframe.onload = function() {
+    if (statusEl) {
+      statusEl.textContent = '✅ スプレッドシートに記録しました';
+      statusEl.style.color = 'var(--success)';
+    }
+  };
+
+  iframe.src = GAS_URL + '?' + params.toString();
 }
 
 // ============================================================
@@ -815,6 +866,11 @@ function render() {
   // Render card content
   const renderers = [renderStart, renderStep1, renderStep2, renderStep3, renderStep4, renderResult];
   card.innerHTML = renderers[state.step]();
+
+  // 結果画面表示時にスプレッドシートへ送信
+  if (state.step === 5) {
+    sendToSpreadsheet(calcDiagnosis());
+  }
 
   // Scroll to top
   window.scrollTo({ top: 0, behavior: 'smooth' });
