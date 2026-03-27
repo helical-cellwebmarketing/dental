@@ -3,28 +3,38 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>こどもの歯並び診断</title>
+  <title>こどもの歯並び診断 | キッズデンタルパーク</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Rounded+Mplus+1c:wght@400;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
-      --primary: #4FC3F7;
-      --primary-dark: #0097C4;
-      --accent: #FF8A65;
-      --accent-dark: #E55B2E;
-      --bg: #F0F8FF;
+      --primary: #00B8D4;
+      --primary-dark: #0097A7;
+      --primary-light: #E0F7FA;
+      --accent: #FFB300;
+      --accent-dark: #F57F17;
+      --pink: #E91E63;
+      --pink-light: #FCE4EC;
+      --bg: #FFFDE7;
       --card: #FFFFFF;
-      --text: #37474F;
-      --text-light: #78909C;
+      --text: #3E2723;
+      --text-light: #8D6E63;
       --success: #66BB6A;
       --warning: #FFA726;
       --danger: #EF5350;
-      --radius: 16px;
+      --radius: 20px;
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', Meiryo, sans-serif;
+      font-family: 'Rounded Mplus 1c', -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', Meiryo, sans-serif;
       background: var(--bg);
+      background-image:
+        radial-gradient(circle at 10% 20%, rgba(0,184,212,0.06) 0%, transparent 50%),
+        radial-gradient(circle at 90% 80%, rgba(233,30,99,0.05) 0%, transparent 50%),
+        radial-gradient(circle at 50% 50%, rgba(255,179,0,0.04) 0%, transparent 50%);
       color: var(--text);
       min-height: 100dvh;
       display: flex;
@@ -35,25 +45,34 @@
     /* ========== Header ========== */
     .header {
       width: 100%;
-      background: linear-gradient(135deg, var(--primary) 0%, #29B6F6 50%, var(--primary-dark) 100%);
-      padding: 24px 16px 20px;
+      background: linear-gradient(135deg, var(--primary) 0%, #26C6DA 40%, #4DD0E1 100%);
+      padding: 20px 16px 32px;
       text-align: center;
       color: #fff;
       position: relative;
       overflow: hidden;
     }
+    .header::before {
+      content: '';
+      position: absolute;
+      top: -30px; right: -30px;
+      width: 120px; height: 120px;
+      background: rgba(255,179,0,0.2);
+      border-radius: 50%;
+    }
     .header::after {
       content: '';
       position: absolute;
-      bottom: -20px;
+      bottom: -2px;
       left: 0; right: 0;
-      height: 40px;
+      height: 30px;
       background: var(--bg);
-      border-radius: 50% 50% 0 0;
+      border-radius: 50% 50% 0 0 / 100% 100% 0 0;
     }
-    .header-icon { font-size: 40px; margin-bottom: 4px; }
-    .header h1 { font-size: 22px; font-weight: 700; letter-spacing: 1px; }
-    .header p { font-size: 13px; opacity: 0.9; margin-top: 4px; }
+    .header-mascot { font-size: 48px; margin-bottom: 2px; line-height: 1; }
+    .header h1 { font-size: 20px; font-weight: 800; letter-spacing: 2px; text-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    .header p { font-size: 12px; opacity: 0.9; margin-top: 4px; font-weight: 500; }
+    .header-sub { display: inline-block; background: rgba(255,255,255,0.25); padding: 3px 14px; border-radius: 20px; font-size: 11px; margin-top: 6px; }
 
     /* ========== Progress Bar ========== */
     .progress-container {
@@ -84,7 +103,7 @@
       top: 50%;
       left: 24px;
       height: 3px;
-      background: var(--primary);
+      background: linear-gradient(90deg, var(--primary), var(--accent));
       transform: translateY(-50%);
       z-index: 1;
       border-radius: 2px;
@@ -105,12 +124,12 @@
       position: relative;
     }
     .progress-dot.active {
-      background: var(--primary);
+      background: var(--accent);
       transform: scale(1.15);
-      box-shadow: 0 0 0 4px rgba(79, 195, 247, 0.25);
+      box-shadow: 0 0 0 4px rgba(255,179,0,0.3);
     }
     .progress-dot.done {
-      background: var(--success);
+      background: var(--primary);
     }
     .progress-labels {
       display: flex;
@@ -123,7 +142,7 @@
       width: 56px;
       transition: color 0.3s;
     }
-    .progress-label.active { color: var(--primary-dark); font-weight: 600; }
+    .progress-label.active { color: var(--accent-dark); font-weight: 600; }
 
     /* ========== Card ========== */
     .card-wrapper {
@@ -135,9 +154,10 @@
     .card {
       background: var(--card);
       border-radius: var(--radius);
-      box-shadow: 0 2px 16px rgba(0,0,0,0.06);
+      box-shadow: 0 4px 24px rgba(0,0,0,0.06), 0 1px 4px rgba(0,0,0,0.04);
       padding: 28px 24px;
       animation: slideIn 0.4s ease;
+      border: 2px solid rgba(0,184,212,0.08);
     }
     @keyframes slideIn {
       from { opacity: 0; transform: translateX(40px); }
@@ -151,11 +171,12 @@
 
     .card-title {
       font-size: 18px;
-      font-weight: 700;
+      font-weight: 800;
       margin-bottom: 4px;
       display: flex;
       align-items: center;
       gap: 8px;
+      color: var(--primary-dark);
     }
     .card-subtitle {
       font-size: 13px;
@@ -180,18 +201,19 @@
       width: 100%;
       padding: 12px 14px;
       border: 2px solid #E0E0E0;
-      border-radius: 10px;
+      border-radius: 12px;
       font-size: 16px;
       outline: none;
-      transition: border-color 0.2s;
-      background: #FAFAFA;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      background: #FFFEF5;
       font-family: inherit;
     }
     .field input:focus, .field select:focus {
-      border-color: var(--primary);
+      border-color: var(--accent);
       background: #fff;
+      box-shadow: 0 0 0 3px rgba(255,179,0,0.15);
     }
-    .field input::placeholder { color: #B0BEC5; }
+    .field input::placeholder { color: #BCAAA4; }
 
     /* ========== Choice Grid ========== */
     .choices {
@@ -204,21 +226,21 @@
       grid-template-columns: 1fr;
     }
     .choice-item {
-      border: 2px solid #E8EEF2;
-      border-radius: 12px;
+      border: 2.5px solid #F0E6D6;
+      border-radius: 16px;
       padding: 14px 12px;
       text-align: center;
       cursor: pointer;
       transition: all 0.2s;
       user-select: none;
       position: relative;
-      background: #FAFCFF;
+      background: #FFFEF8;
     }
-    .choice-item:hover { border-color: var(--primary); background: #F0F9FF; }
+    .choice-item:hover { border-color: var(--accent); background: #FFF8E1; transform: translateY(-1px); }
     .choice-item.selected {
-      border-color: var(--primary);
-      background: #E1F5FE;
-      box-shadow: 0 0 0 2px rgba(79,195,247,0.2);
+      border-color: var(--accent);
+      background: linear-gradient(135deg, #FFF8E1, #FFECB3);
+      box-shadow: 0 0 0 2px rgba(255,179,0,0.2), 0 2px 8px rgba(255,179,0,0.1);
     }
     .choice-item .icon { font-size: 28px; display: block; margin-bottom: 6px; }
     .choice-item .label { font-size: 13px; font-weight: 600; line-height: 1.3; }
@@ -229,7 +251,7 @@
       width: 20px;
       height: 20px;
       border-radius: 50%;
-      background: var(--primary);
+      background: var(--accent);
       color: #fff;
       font-size: 12px;
       display: none;
@@ -255,45 +277,50 @@
       flex: 1;
       padding: 14px;
       border: none;
-      border-radius: 12px;
+      border-radius: 30px;
       font-size: 16px;
       font-weight: 700;
       cursor: pointer;
       transition: all 0.2s;
       font-family: inherit;
+      letter-spacing: 0.5px;
     }
     .btn:active { transform: scale(0.97); }
     .btn-primary {
-      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      background: linear-gradient(135deg, var(--accent), #FF8F00);
       color: #fff;
-      box-shadow: 0 4px 12px rgba(79,195,247,0.35);
+      box-shadow: 0 4px 16px rgba(255,179,0,0.35);
     }
-    .btn-primary:hover { box-shadow: 0 6px 16px rgba(79,195,247,0.5); }
+    .btn-primary:hover { box-shadow: 0 6px 20px rgba(255,179,0,0.5); transform: translateY(-1px); }
     .btn-primary:disabled {
-      background: #CFD8DC;
+      background: #D7CCC8;
       box-shadow: none;
       cursor: not-allowed;
     }
     .btn-secondary {
-      background: #ECEFF1;
+      background: #FFF3E0;
       color: var(--text);
+      border: 2px solid #FFE0B2;
     }
-    .btn-secondary:hover { background: #CFD8DC; }
+    .btn-secondary:hover { background: #FFE0B2; }
     .btn-accent {
-      background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+      background: linear-gradient(135deg, var(--pink), #C2185B);
       color: #fff;
-      box-shadow: 0 4px 12px rgba(255,138,101,0.35);
+      box-shadow: 0 4px 16px rgba(233,30,99,0.3);
     }
 
     /* ========== Start Screen ========== */
     .start-screen { text-align: center; padding: 20px 0; }
     .start-screen .mascot { font-size: 80px; margin-bottom: 8px; }
-    .start-screen h2 { font-size: 22px; margin-bottom: 8px; color: var(--primary-dark); }
+    .start-screen h2 { font-size: 22px; margin-bottom: 8px; color: var(--primary-dark); font-weight: 800; }
     .start-screen p { font-size: 14px; color: var(--text-light); margin-bottom: 24px; line-height: 1.7; }
     .start-features {
       text-align: left;
       margin: 0 auto 24px;
       max-width: 300px;
+      background: linear-gradient(135deg, #E0F7FA, #FFF8E1);
+      border-radius: 16px;
+      padding: 16px 20px;
     }
     .start-features li {
       list-style: none;
@@ -303,15 +330,16 @@
       align-items: center;
       gap: 8px;
     }
-    .start-features li::before { content: '✅'; font-size: 16px; }
+    .start-features li::before { content: '🦷'; font-size: 16px; }
     .start-time {
       font-size: 12px;
-      color: var(--text-light);
-      background: #F5F5F5;
+      color: var(--accent-dark);
+      background: #FFF8E1;
       display: inline-block;
       padding: 6px 16px;
       border-radius: 20px;
       margin-bottom: 16px;
+      border: 1px solid #FFE082;
     }
 
     /* ========== Result Screen ========== */
@@ -333,10 +361,11 @@
 
     .result-section {
       text-align: left;
-      background: #F8FBFF;
-      border-radius: 12px;
+      background: linear-gradient(135deg, #FFFEF5, #FFF8E1);
+      border-radius: 16px;
       padding: 16px;
       margin-bottom: 14px;
+      border: 1px solid #FFF0C0;
     }
     .result-section h4 {
       font-size: 14px;
@@ -353,19 +382,20 @@
     .result-section ul { padding-left: 18px; }
 
     .result-cta {
-      background: linear-gradient(135deg, #FFF3E0, #FFE0B2);
-      border-radius: 12px;
+      background: linear-gradient(135deg, #E0F7FA, #B2EBF2);
+      border-radius: 16px;
       padding: 18px 16px;
       margin-top: 16px;
+      border: 2px solid #80DEEA;
     }
     .result-cta h4 {
       font-size: 15px;
       margin-bottom: 6px;
-      color: var(--accent-dark);
+      color: var(--primary-dark);
     }
     .result-cta p {
       font-size: 13px;
-      color: #795548;
+      color: #37474F;
       line-height: 1.6;
     }
 
@@ -373,8 +403,8 @@
     .floating {
       position: fixed;
       pointer-events: none;
-      opacity: 0.08;
-      font-size: 40px;
+      opacity: 0.12;
+      font-size: 36px;
       animation: float 6s ease-in-out infinite;
       z-index: 0;
     }
@@ -383,27 +413,50 @@
       50% { transform: translateY(-20px) rotate(10deg); }
     }
 
+    /* ========== Decorative Wave ========== */
+    .deco-dots {
+      position: absolute;
+      bottom: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 6px;
+      z-index: 1;
+    }
+    .deco-dots span {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.4);
+    }
+
     /* ========== Responsive ========== */
     @media (max-width: 400px) {
-      .header h1 { font-size: 18px; }
+      .header h1 { font-size: 16px; }
+      .header-mascot { font-size: 40px; }
       .card { padding: 20px 16px; }
       .choices { gap: 8px; }
       .choice-item { padding: 10px 8px; }
     }
+
+    /* ========== Gender SVG sizing ========== */
+    .choice-item .icon svg { display: block; margin: 0 auto 2px; }
   </style>
 </head>
 <body>
 
 <!-- Floating decoration -->
-<div class="floating" style="top:20%;left:5%;animation-delay:0s;">🦷</div>
-<div class="floating" style="top:50%;right:5%;animation-delay:2s;">🪥</div>
-<div class="floating" style="bottom:15%;left:10%;animation-delay:4s;">✨</div>
+<div class="floating" style="top:18%;left:5%;animation-delay:0s;">🦷</div>
+<div class="floating" style="top:45%;right:4%;animation-delay:2s;">🪥</div>
+<div class="floating" style="bottom:20%;left:8%;animation-delay:4s;">🐝</div>
+<div class="floating" style="top:70%;right:12%;animation-delay:3s;font-size:28px;">🌟</div>
 
 <!-- Header -->
 <div class="header">
-  <div class="header-icon">🦷</div>
+  <div class="header-mascot">🐝🦷</div>
   <h1>こどもの歯並び診断</h1>
   <p>お子さまの将来の笑顔のために</p>
+  <div class="header-sub">横浜山手キッズデンタルパーク</div>
+  <div class="deco-dots"><span></span><span></span><span></span><span></span><span></span></div>
 </div>
 
 <!-- Progress Bar -->
@@ -458,10 +511,10 @@ const state = {
 function renderStart() {
   return `
     <div class="start-screen">
-      <div class="mascot">🦷✨</div>
-      <h2>お子さまの歯並び<br>大丈夫？診断</h2>
+      <div class="mascot">🐝🦷✨</div>
+      <h2>お子さまの歯並び<br>だいじょうぶ？診断</h2>
       <p>かんたんな質問に答えるだけで<br>お子さまの歯並びの傾向がわかります！</p>
-      <div class="start-time">⏱ 所要時間：約2分</div>
+      <div class="start-time">🕐 所要時間：約2分</div>
       <ul class="start-features">
         <li>お子さまの情報を入力</li>
         <li>食生活や癖をチェック</li>
@@ -469,7 +522,7 @@ function renderStart() {
         <li>診断結果＆アドバイス</li>
       </ul>
       <div class="btn-row">
-        <button class="btn btn-primary" onclick="goNext()">診断をはじめる 🚀</button>
+        <button class="btn btn-primary" onclick="goNext()">診断をはじめる</button>
       </div>
     </div>
   `;
@@ -494,11 +547,13 @@ function renderStep1() {
       <label>性別</label>
       <div class="choices">
         <div class="choice-item ${state.child.gender==='boy'?'selected':''}" data-gender="boy" onclick="selectGender('boy')">
-          <span class="icon">👦</span><span class="label">おとこの子</span>
+          <span class="icon"><svg width="40" height="44" viewBox="0 0 40 44"><path d="M20 2c-9 0-16 6-16 14v4c0 3 1 5 2 7l-3 8c0 2 1 3 3 3h28c2 0 3-1 3-3l-3-8c1-2 2-4 2-7v-4c0-8-7-14-16-14z" fill="#FFB300"/><circle cx="14" cy="18" r="3" fill="white"/><circle cx="26" cy="18" r="3" fill="white"/><circle cx="14" cy="18" r="1.5" fill="#333"/><circle cx="26" cy="18" r="1.5" fill="#333"/><path d="M16 25c2 2 6 2 8 0" stroke="#333" stroke-width="1.5" fill="none" stroke-linecap="round"/><path d="M36 10l6-4v12l-6-4" fill="#FFB300" stroke="#E65100" stroke-width="1"/></svg></span>
+          <span class="label">おとこの子</span>
           <span class="check">✓</span>
         </div>
         <div class="choice-item ${state.child.gender==='girl'?'selected':''}" data-gender="girl" onclick="selectGender('girl')">
-          <span class="icon">👧</span><span class="label">おんなの子</span>
+          <span class="icon"><svg width="40" height="44" viewBox="0 0 40 44"><path d="M20 2c-9 0-16 6-16 14v4c0 3 1 5 2 7l-3 8c0 2 1 3 3 3h28c2 0 3-1 3-3l-3-8c1-2 2-4 2-7v-4c0-8-7-14-16-14z" fill="#F48FB1"/><circle cx="14" cy="18" r="3" fill="white"/><circle cx="26" cy="18" r="3" fill="white"/><circle cx="14" cy="18" r="1.5" fill="#333"/><circle cx="26" cy="18" r="1.5" fill="#333"/><path d="M16 25c2 2 6 2 8 0" stroke="#333" stroke-width="1.5" fill="none" stroke-linecap="round"/><path d="M14 4l-2-3M20 2l0-2M26 4l2-3" stroke="#E91E63" stroke-width="1.5" stroke-linecap="round"/><path d="M17 0l3 4l3-4" fill="#E91E63"/></svg></span>
+          <span class="label">おんなの子</span>
           <span class="check">✓</span>
         </div>
       </div>
